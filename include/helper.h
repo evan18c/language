@@ -1,0 +1,10 @@
+// Contains helper functions.
+// Author: Evan Cassidy
+// Date: 3/27/2026
+#ifndef HELPER_H
+#define HELPER_H
+
+// Returns true if str in arr otherwise false.
+bool in_string_array(const char **arr, const int len, const char *str);
+
+#endif
