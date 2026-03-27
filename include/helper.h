@@ -7,4 +7,7 @@
 // Returns true if str in arr otherwise false.
 bool in_string_array(const char **arr, const int len, const char *str);
 
+// Returns true if str is an integer otherwise false.
+bool is_integer(const char *str);
+
 #endif

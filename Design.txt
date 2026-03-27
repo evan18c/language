@@ -10,7 +10,7 @@ my_str : str = "Hello";
 my_bol : bool = true;
 
 map my_map(in: i64) -> i64 {
-    ret in * in
+    ret in * in;
 };
 
 if (my_int < 20) {
@@ -19,7 +19,7 @@ if (my_int < 20) {
 ========== Example Code ==========
 
 Tokenization Details:
-    Token Types: KEYWORD, LITERAL, IDENTIFIER, OPERATOR, DELIMITER, SPECIAL, EOF
+    Token Types: KEYWORD, LITERAL, IDENTIFIER, OPERATOR, DELIMITER, EOF
     Keywords:
         Variables: i64 i32 i16 i8 f64 f32 f16 f8 str bool
         Functions: map ret ->

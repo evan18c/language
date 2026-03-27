@@ -4,6 +4,7 @@
 
 // Includes
 #include "tokenize.h"
+#include "helper.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -15,7 +16,9 @@ Token *Tokenize(char *raw, int *total) {
     int token_i = 0;
 
     // Dictionary
-    const char *dict_kw[] = {"i64", "f64", "str", "bool", "map", "ret", "->"};
+    const char *dict_kw[] = {"i64", "str", "bool", "map", "ret", "->"};
+    const int dict_kw_length = 6;
+    const char dict[] = "=+-*/:;\n";
 
     // Text Iterator
     int i = 0;
@@ -29,8 +32,43 @@ Token *Tokenize(char *raw, int *total) {
     char current_token[100] = {0};
     int cti = 0;
 
+    // Loop through text
     while (i < length) {
 
+        // Handle current token
+        if (strchr(dict, raw[i]) != NULL && cti != 0) {
+
+            // Check if token is a keyword
+            if (in_string_array(dict_kw, dict_kw_length, current_token)) {
+                if (strcmp(current_token, "i64") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_I64, 0, row, column};
+                }
+                if (strcmp(current_token, "str") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_STR, 0, row, column};
+                }
+                if (strcmp(current_token, "bool") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_BOOL, 0, row, column};
+                }
+                if (strcmp(current_token, "map") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_MAP, 0, row, column};
+                }
+                if (strcmp(current_token, "ret") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_RET, 0, row, column};
+                }
+            }
+
+            // Check if token is an integer
+            else if (is_integer(current_token)) {
+                tokens[token_i] = (Token){TOKEN_LITERAL, LITERAL_INTEGER, atoi(current_token), row, column};
+            }
+
+            // Increment
+            token_i++;
+            memset(current_token, 0, 100);
+            cti = 0;
+        }
+
+        // Handle individual character
         switch (raw[i]) {
 
             // Operators
@@ -77,6 +115,13 @@ Token *Tokenize(char *raw, int *total) {
                 column++;
                 break;
 
+            // New Line
+            case '\n':
+                row++;
+                column = 0;
+                break;
+
+            // Default
             default:
                 current_token[cti] = raw[i];
                 cti++;
@@ -87,6 +132,43 @@ Token *Tokenize(char *raw, int *total) {
         i++;
     }
 
+    // EOF
+    tokens[token_i] = (Token){TOKEN_EOF, NONE, 0, row, column};
+    token_i++;
+
+    // Returns
     *total = token_i;
     return tokens;
+}
+
+const char *TokenTypeToString(TokenType type) {
+    switch (type) {
+        case TOKEN_KEYWORD: return "KEYWORD";
+        case TOKEN_LITERAL: return "LITERAL";
+        case TOKEN_IDENTIFIER: return "IDENTIFIER";
+        case TOKEN_OPERATOR: return "OPERATOR";
+        case TOKEN_DELIMITER: return "DELIMITER";
+        case TOKEN_EOF: return "EOF";
+        default: return "UNKNOWN";
+    }
+}
+
+const char *TokenSubtypeToString(TokenSubtype type) {
+    switch (type) {
+        case NONE: return "";
+        case KEYWORD_MAP: return "MAP";
+        case KEYWORD_RET: return "RET";
+        case KEYWORD_ARROW: return "ARROW";
+        case KEYWORD_I64: return "I64";
+        case KEYWORD_STR: return "STR";
+        case KEYWORD_BOOL: return "BOOL";
+        case OPERATOR_EQUAL: return "EQUAL";
+        case OPERATOR_PLUS: return "PLUS";
+        case OPERATOR_MINUS: return "MINUS";
+        case OPERATOR_MULTIPLY: return "MULTIPLY";
+        case OPERATOR_DIVIDE: return "DIVIDE";
+        case DELIMITER_COLON: return "COLON";
+        case DELIMITER_SEMICOLON: return "SEMICOLON";
+        default: return "UNKNOWN";
+    }
 }

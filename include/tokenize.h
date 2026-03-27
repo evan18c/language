@@ -10,14 +10,16 @@ typedef enum {
     TOKEN_IDENTIFIER,
     TOKEN_OPERATOR,
     TOKEN_DELIMITER,
-    TOKEN_SPECIAL,
     TOKEN_EOF
 } TokenType;
 
 typedef enum {
 
+    NONE,
+
     KEYWORD_MAP,
     KEYWORD_RET,
+    KEYWORD_ARROW,
     KEYWORD_IF,
     KEYWORD_WHILE,
     KEYWORD_FOR,
@@ -33,12 +35,17 @@ typedef enum {
     KEYWORD_STR,
     KEYWORD_BOOL,
 
+    LITERAL_INTEGER,
+    LITERAL_FLOAT,
+    LITERAL_STRING,
+    LITERAL_BOOL,
+
+    OPERATOR_EQUAL,
     OPERATOR_PLUS,
     OPERATOR_MINUS,
     OPERATOR_MULTIPLY,
     OPERATOR_DIVIDE,
     OPERATOR_MODULO,
-    OPERATOR_EQUAL,
     OPERATOR_PLUSEQUAL,
     OPERATOR_MINUSEQUAL,
     OPERATOR_MULTIPLYEQUAL,
@@ -75,6 +82,10 @@ typedef struct {
     int row, column;
 } Token;
 
+
 Token *Tokenize(char *raw, int *total);
+
+const char *TokenTypeToString(TokenType type);
+const char *TokenSubtypeToString(TokenSubtype type);
 
 #endif
