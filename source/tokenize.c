@@ -88,14 +88,14 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '+':
-                tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_PLUS, 0, row, column};
+                tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_ADD, 0, row, column};
                 token_i++;
                 column++;
                 break;
 
             case '-':
                 if (raw[i+1] != '>') {
-                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_MINUS, 0, row, column};
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_SUBTRACT, 0, row, column};
                     token_i++;
                     column++;
                 } else {
@@ -187,8 +187,8 @@ const char *TokenSubtypeToString(TokenSubtype type) {
         case LITERAL_STRING: return "STRING";
         case LITERAL_BOOL: return "BOOL";
         case OPERATOR_EQUAL: return "EQUAL";
-        case OPERATOR_PLUS: return "PLUS";
-        case OPERATOR_MINUS: return "MINUS";
+        case OPERATOR_ADD: return "ADD";
+        case OPERATOR_SUBTRACT: return "SUBTRACT";
         case OPERATOR_MULTIPLY: return "MULTIPLY";
         case OPERATOR_DIVIDE: return "DIVIDE";
         case DELIMITER_COLON: return "COLON";

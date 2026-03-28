@@ -3,6 +3,8 @@
 // Date: 3/27/2026
 #include "parse.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 // Parser Class
 typedef struct Parser_t {
@@ -27,6 +29,68 @@ Token consume(Parser *parser) {
     return token;
 }
 
+// Parse Expression (Primary)
+Node *ParseExpressionPrimary(Parser *parser) {
+    
+    Token token = consume(parser);
+
+    if (token.type == TOKEN_LITERAL) {
+        Node *node = malloc(sizeof(Node));
+        node->type = NODE_LITERAL;
+        node->data.literal.val = token.value.int_value;
+        return node;
+    }
+
+    if (token.type == TOKEN_IDENTIFIER) {
+        Node *node = malloc(sizeof(Node));
+        node->type = NODE_IDENTIFIER;
+        node->data.identifier.id = token.value.string_value;
+    }
+
+    printf("Unexpected token...");
+}
+
+// Parse Expression (Multiplication/Division)
+Node *ParseExpressionMulDiv(Parser *parser) {
+    Node *expr = ParseExpressionPrimary(parser);
+
+    while(peek(parser).subtype == OPERATOR_MULTIPLY || peek(parser).subtype == OPERATOR_DIVIDE) {
+        Node *node = malloc(sizeof(Node));
+        node->type = NODE_BINARY;
+
+        node->data.binary.l = expr;
+        node->data.binary.op = consume(parser).subtype;
+        node->data.binary.r = ParseExpressionPrimary(parser);
+
+        expr = node;
+    }
+
+    return expr;
+}
+
+// Parse Expression (Addition/Subtraction)
+Node *ParseExpressionAddSub(Parser *parser) {
+    Node *expr = ParseExpressionMulDiv(parser);
+
+    while(peek(parser).subtype == OPERATOR_ADD || peek(parser).subtype == OPERATOR_SUBTRACT) {
+        Node *node = malloc(sizeof(Node));
+        node->type = NODE_BINARY;
+
+        node->data.binary.l = expr;
+        node->data.binary.op = consume(parser).subtype;
+        node->data.binary.r = ParseExpressionMulDiv(parser);
+
+        expr = node;
+    }
+
+    return expr;
+}
+
+// Parse Expression
+Node *ParseExpression(Parser *parser) {
+    return ParseExpressionAddSub(parser);
+}
+
 // Parse Definition
 Node *ParseDefinition(Parser *parser) {
 
@@ -42,7 +106,7 @@ Node *ParseDefinition(Parser *parser) {
 
     consume(parser); // =
 
-    // Consume Expression
+    node->data.definition.expr = ParseExpression(parser);
 
     consume(parser); // ;
 

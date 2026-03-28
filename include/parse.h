@@ -23,20 +23,6 @@ typedef struct Node_t {
     NodeType type;
     union data_t {
 
-        struct literal_t {
-            long long val;
-        } literal;
-
-        struct identifier_t {
-            char *id;
-        } identifier;
-
-        struct binary_t {
-            Node *l;
-            char op;
-            Node *r;
-        } binary;
-
         struct definition_t {
             char *var;
             char *type;
@@ -47,6 +33,20 @@ typedef struct Node_t {
             char *var;
             Node *expr;
         } assignment;
+
+        struct binary_t {
+            Node *l;
+            TokenSubtype op;
+            Node *r;
+        } binary;
+
+        struct literal_t {
+            long long val;
+        } literal;
+
+        struct identifier_t {
+            char *id;
+        } identifier;
 
     } data;
     
