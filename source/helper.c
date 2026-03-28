@@ -3,6 +3,8 @@
 // Date: 3/27/2026
 
 #include "helper.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -35,4 +37,20 @@ bool is_float(const char *str) {
         i++;
     }
     return true;
+}
+
+char *read_file(const char *path) {
+    FILE *f;
+    f = fopen(path, "r");
+
+    fseek(f, 0, SEEK_END);
+    int size = ftell(f);
+    rewind(f);
+
+    char *data = malloc(size + 1);
+    memset(data, 0, size + 1);
+    fread(data, 1, size, f);
+
+    fclose(f);
+    return data;
 }

@@ -102,7 +102,7 @@ Node *ParseDefinition(Parser *parser) {
 
     consume(parser); // :
 
-    node->data.definition.type = consume(parser).value.string_value; // type
+    node->data.definition.type = consume(parser).subtype;
 
     consume(parser); // =
 
@@ -114,7 +114,7 @@ Node *ParseDefinition(Parser *parser) {
     return node;
 }
 
-Node **Parse(Token *tokens) {
+Node **Parse(Token *tokens, int *total) {
 
     // Create Parser
     Parser parser;
@@ -135,4 +135,8 @@ Node **Parse(Token *tokens) {
         }
 
     }
+
+    // Return
+    *total = output_pos;
+    return output;
 }

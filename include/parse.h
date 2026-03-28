@@ -25,7 +25,7 @@ typedef struct Node_t {
 
         struct definition_t {
             char *var;
-            char *type;
+            TokenSubtype type;
             Node *expr;
         } definition;
 
@@ -53,6 +53,6 @@ typedef struct Node_t {
 } Node;
 
 // Converts Tokens -> Array of Nodes
-Node **Parse(Token *tokens);
+Node **Parse(Token *tokens, int *total);
 
 #endif

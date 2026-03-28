@@ -9,17 +9,24 @@
 // Custom
 #include "helper.h"
 #include "tokenize.h"
+#include "parse.h"
+#include "transpile.h"
 
 int main() {
     
     const char *code = "test:i64 = 5;";
 
-    printf("Tokenizing...\n");
-    int total;
-    Token *tokens = Tokenize(code, &total);
+    printf("Tokenizing...");
+    int total_tokens;
+    Token *tokens = Tokenize(code, &total_tokens);
+    printf("Total: %d\n", total_tokens);
 
-    printf("Tokens:\n");
-    PrintTokens(tokens, total);
+    printf("Parsing...");
+    int total_nodes;
+    Node **nodes = Parse(tokens, &total_nodes);
+    printf("Total: %d\n", total_nodes);
+
+    printf("\nC: \n%s\n\n", NodeToC(nodes[0]));
 
     return 0;
 }
