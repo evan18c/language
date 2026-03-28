@@ -38,25 +38,11 @@ Tokenization Details:
         Scope: ( ) { }
         Extra: , : ; ' "
 
-Abstract Syntax Tree Grammar:
-    Program: List of statements
-    Statements:
-        Expressions:
-            StatementExpressionPrimary
-            StatementExpressionMultiplicative
-            StatementExpressionAdditive
-            StatementExpressionBinary
-            StatementExpressionUnary
-        Default:
-            StatementDefaultLet
-            StatementDefaultAssignment
-            StatementDefaultWhile
-            StatementDefaultIf
-            StatementDefaultFunction
-            StatementDefaultFunctionStandard
-            StatementDefaultFunctionCall
-            StatementDefaultReturn
-
-    Objects:
-        Literal
-        Identifier
+Parsing Details:
+    Nodes:
+        Expression
+        Definition
+        Assignment
+        Function
+        FunctionCall
+        FunctionReturn

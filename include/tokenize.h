@@ -4,7 +4,7 @@
 #ifndef TOKENIZE_H
 #define TOKENIZE_H
 
-typedef enum {
+typedef enum TokenType_t {
     TOKEN_KEYWORD,
     TOKEN_LITERAL,
     TOKEN_IDENTIFIER,
@@ -13,7 +13,7 @@ typedef enum {
     TOKEN_EOF
 } TokenType;
 
-typedef enum {
+typedef enum TokenSubtype_t {
 
     NONE,
 
@@ -74,18 +74,25 @@ typedef enum {
 typedef struct {
     TokenType type;
     TokenSubtype subtype;
-    union {
+    union value_t {
         long long int_value;
         double float_value;
         char *string_value;
-    };
+        bool bool_value;
+    } value;
     int row, column;
 } Token;
 
-
+// Converts raw -> Tokens.
 Token *Tokenize(char *raw, int *total);
 
+// TokenType -> String.
 const char *TokenTypeToString(TokenType type);
+
+// TokenSubtype -> String.
 const char *TokenSubtypeToString(TokenSubtype type);
+
+// Pretty prints all tokens.
+void PrintTokens(Token *tokens, int total);
 
 #endif

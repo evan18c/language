@@ -9,17 +9,14 @@
 
 int main() {
     
-    const char *code = "ret;";
+    const char *code = "test:i64 = 5;";
 
     printf("Tokenizing...\n");
     int total;
     Token *tokens = Tokenize(code, &total);
 
     printf("Tokens:\n");
-    for (int i=0; i<total; i++) {
-        Token token = tokens[i];
-        printf("[%s:%s @ %d:%d]\n", TokenTypeToString(token.type), TokenSubtypeToString(token.subtype), token.row, token.column);
-    }
+    PrintTokens(tokens, total);
 
     return 0;
 }

@@ -25,3 +25,14 @@ bool is_integer(const char *str) {
     }
     return true;
 }
+
+bool is_float(const char *str) {
+    int i=0;
+    while (str[i] != 0) {
+        if (!isdigit(str[i]) && str[i] != '-' && str[i] != '.') {
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
