@@ -107,6 +107,7 @@ Token *Tokenize(char *raw, int *total) {
             // Token is an identifier
             else {
                 char *str = malloc(strlen(current_token) + 1);
+                memset(str, 0, strlen(current_token) + 1);
                 strcpy(str, current_token);
                 tokens[token_i] = (Token){.type=TOKEN_IDENTIFIER, .subtype=NONE, .value.string_value=str, .row=row, .column=column};
             }

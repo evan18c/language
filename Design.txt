@@ -2,6 +2,7 @@ Crustlython by Evan Cassidy.
 Interpreted, Statically Typed, Procedural
 Inspired By: C, C++, Python, Rust, Assembly
 Start simple, add features.
+Note: Update "consume" function to have expected token.
 
 ========== Example Code ==========
 my_int : i64 = 17;
@@ -11,11 +12,11 @@ my_bol : bool = true;
 
 map my_map(in: i64) -> i64 {
     ret in * in;
-};
+}
 
 if (my_int < 20) {
     my_str = "new string";
-};
+}
 ========== Example Code ==========
 
 Tokenization Details:

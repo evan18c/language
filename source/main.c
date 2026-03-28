@@ -14,7 +14,7 @@
 
 int main() {
     
-    const char *code = "test:i64 = 5 + 3 * 2;";
+    const char *code = read_file("data/code.l");
 
     printf("Tokenizing...");
     int total_tokens;

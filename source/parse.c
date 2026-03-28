@@ -6,12 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// Parser Class
-typedef struct Parser_t {
-    Token *tokens;
-    int pos;
-} Parser;
-
 // Parser.peek
 Token peek(Parser *parser) {
     return parser->tokens[parser->pos];
@@ -27,6 +21,49 @@ Token consume(Parser *parser) {
     Token token = parser->tokens[parser->pos];
     parser->pos++;
     return token;
+}
+
+Node **Parse(Token *tokens, int *total) {
+
+    // Create Parser
+    Parser parser;
+    parser.tokens = tokens;
+    parser.pos = 0;
+
+    // Output
+    Node **output = malloc(sizeof(Node *) * 1000);
+    int output_pos = 0;
+
+    // Main Parse Loop
+    while (peek(&parser).type != TOKEN_EOF) {
+        output[output_pos] = ParseStatement(&parser);
+        output_pos++;
+    }
+
+    // Return
+    *total = output_pos;
+    return output;
+}
+
+// Parse Statement
+Node *ParseStatement(Parser *parser) {
+
+    // Definition
+    if (peek(parser).type == TOKEN_IDENTIFIER && peekn(parser, 1).subtype == DELIMITER_COLON)
+        return ParseDefinition(parser);
+
+    // Assignment
+    if (peek(parser).type == TOKEN_IDENTIFIER && peekn(parser, 1).subtype == OPERATOR_EQUAL)
+        return ParseAssignment(parser);
+
+    // Function
+    if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_MAP)
+        return ParseFunction(parser);
+
+    // Return
+    if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_RET)
+        return ParseReturn(parser);
+
 }
 
 // Parse Expression (Primary)
@@ -45,9 +82,10 @@ Node *ParseExpressionPrimary(Parser *parser) {
         Node *node = malloc(sizeof(Node));
         node->type = NODE_IDENTIFIER;
         node->data.identifier.id = token.value.string_value;
+        return node;
     }
 
-    printf("Unexpected token...");
+    printf("Unexpected token: %d\n", token.type);
 }
 
 // Parse Expression (Multiplication/Division)
@@ -102,11 +140,11 @@ Node *ParseDefinition(Parser *parser) {
 
     consume(parser); // :
 
-    node->data.definition.type = consume(parser).subtype;
+    node->data.definition.type = consume(parser).subtype; // type
 
     consume(parser); // =
 
-    node->data.definition.expr = ParseExpression(parser);
+    node->data.definition.expr = ParseExpression(parser); // expr
 
     consume(parser); // ;
 
@@ -125,7 +163,7 @@ Node *ParseAssignment(Parser *parser) {
 
     consume(parser); // =
 
-    node->data.definition.expr = ParseExpression(parser);
+    node->data.definition.expr = ParseExpression(parser); // expr
 
     consume(parser); // ;
 
@@ -133,35 +171,63 @@ Node *ParseAssignment(Parser *parser) {
     return node;
 }
 
-Node **Parse(Token *tokens, int *total) {
+// Parse Function
+Node *ParseFunction(Parser *parser) {
 
-    // Create Parser
-    Parser parser;
-    parser.tokens = tokens;
-    parser.pos = 0;
+    // Create Node
+    Node *node = malloc(sizeof(Node));
+    node->type = NODE_FUNCTION;
 
-    // Output
-    Node **output = malloc(sizeof(Node *) * 1000);
-    int output_pos = 0;
+    consume(parser); // map
 
-    // Main Parse Loop
-    while (peek(&parser).type != TOKEN_EOF) {
+    node->data.function.name = consume(parser).value.string_value; // name
 
-        // Definitions
-        if (peek(&parser).type == TOKEN_IDENTIFIER && peekn(&parser, 1).subtype == DELIMITER_COLON) {
-            output[output_pos] = ParseDefinition(&parser);
-            output_pos++;
-        }
+    consume(parser); // (
 
-        // Assignment
-        if (peek(&parser).type == TOKEN_IDENTIFIER && peekn(&parser, 1).subtype == OPERATOR_EQUAL) {
-            output[output_pos] = ParseAssignment(&parser);
-            output_pos++;
-        }
-
+    node->data.function.args = malloc(sizeof(char *) * 1000);
+    node->data.function.arg_types = malloc(sizeof(TokenSubtype *) * 1000);
+    node->data.function.args_total = 0;
+    while (peek(parser).subtype != DELIMITER_RPAREN) {
+        if (node->data.function.args_total != 0) consume(parser); // ,
+        node->data.function.args[node->data.function.args_total] = consume(parser).value.string_value;
+        consume(parser); // :
+        node->data.function.arg_types[node->data.function.args_total] = consume(parser).subtype; // arg type
+        node->data.function.args_total++;
     }
 
-    // Return
-    *total = output_pos;
-    return output;
+    consume(parser); // )
+
+    consume(parser); // ->
+
+    node->data.function.ret_type = consume(parser).subtype; // ret type
+
+    consume(parser); // {
+
+    node->data.function.nodes = malloc(sizeof(Node *) * 1000);
+    node->data.function.nodes_total = 0;
+    while (peek(parser).subtype != DELIMITER_RBRACE) {
+        node->data.function.nodes[node->data.function.nodes_total] = ParseStatement(parser);
+        node->data.function.nodes_total++;
+    }
+
+    consume(parser); // }
+
+    // Return Node
+    return node;
+}
+
+Node *ParseReturn(Parser *parser) {
+
+    // Create Node
+    Node *node = malloc(sizeof(Node));
+    node->type = NODE_RETURN;
+
+    consume(parser); // ret
+
+    node->data.return_t.ret = ParseExpression(parser);
+
+    consume(parser); // ;
+
+    // Return Node
+    return node;
 }

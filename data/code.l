@@ -1,1 +1,3 @@
-test:i64 = 5;
+map S(n:i32) -> i32 {
+    ret n + 1;
+}
