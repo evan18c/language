@@ -39,6 +39,20 @@ bool is_float(const char *str) {
     return true;
 }
 
+bool is_bool(const char *str) {
+    if (strcmp(str, "true") == 0 || strcmp(str, "false") == 0) {
+        return true;
+    }
+    return false;
+}
+
+bool atob(const char *str) {
+    if (strcmp(str, "true") == 0) {
+        return true;
+    }
+    return false;
+}
+
 char *read_file(const char *path) {
     FILE *f;
     f = fopen(path, "r");

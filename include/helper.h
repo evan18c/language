@@ -13,6 +13,12 @@ bool is_integer(const char *str);
 // Returns true if str is a float otherwise false.
 bool is_float(const char *str);
 
+// Returns true if str is a bool otherwise false.
+bool is_bool(const char *str);
+
+// Ascii To Bool
+bool atob(const char *str);
+
 // Reads file into buffer.
 char *read_file(const char *path);
 

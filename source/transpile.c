@@ -12,6 +12,23 @@
 #include "tokenize.h"
 #include "parse.h"
 
+// Converts an operator to C code
+char *OperatorToC(TokenSubtype type) {
+    switch (type) {
+        case OPERATOR_EQUAL: return "=";
+        case OPERATOR_ADD: return "+";
+        case OPERATOR_SUBTRACT: return "-";
+        case OPERATOR_MULTIPLY: return "*";
+        case OPERATOR_DIVIDE: return "/";
+        case OPERATOR_MODULO: return "%";
+        case OPERATOR_ADDEQUAL: return "+=";
+        case OPERATOR_SUBTRACTEQUAL: return "-=";
+        case OPERATOR_MULTIPLYEQUAL: return "*-";
+        case OPERATOR_DIVIDEEQUAL: return "/=";
+        case OPERATOR_MODULOEQUAL: return "%=";
+    }
+}
+
 // Converts custom type to C type
 char *TypeToC(TokenSubtype type) {
     switch (type) {
@@ -48,6 +65,7 @@ char *NodeToC(Node *node) {
             sprintf(string, "%s", node->data.identifier.id);
             break;
         case NODE_BINARY:
+            sprintf(string, "%s %s %s", NodeToC(node->data.binary.l), OperatorToC(node->data.binary.op), NodeToC(node->data.binary.r));
             break;
     }
 

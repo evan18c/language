@@ -16,9 +16,9 @@ Token *Tokenize(char *raw, int *total) {
     int token_i = 0;
 
     // Dictionary
-    const char dict_ch[] = " =+-*/:;\n\t";
-    const char *dict_kw[] = {"i64", "str", "bool", "map", "ret", "->"};
-    const int dict_kw_length = 6;
+    const char dict_ch[] = " =+-*/<>!(){},:;'%\"\n\t";
+    const char *dict_kw[] = {"i64", "i32", "i16", "i8", "f64", "f32", "f16", "f8", "str", "bool", "map", "ret", "->", "if", "while", "for"};
+    const int dict_kw_length = sizeof(dict_kw) / sizeof(char *);
 
     // Text Iterator
     int i = 0;
@@ -43,6 +43,27 @@ Token *Tokenize(char *raw, int *total) {
                 if (strcmp(current_token, "i64") == 0) {
                     tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_I64, 0, row, column};
                 }
+                if (strcmp(current_token, "i32") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_I32, 0, row, column};
+                }
+                if (strcmp(current_token, "i16") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_I16, 0, row, column};
+                }
+                if (strcmp(current_token, "i8") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_I8, 0, row, column};
+                }
+                if (strcmp(current_token, "f64") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_F64, 0, row, column};
+                }
+                if (strcmp(current_token, "f32") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_F32, 0, row, column};
+                }
+                if (strcmp(current_token, "f16") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_F16, 0, row, column};
+                }
+                if (strcmp(current_token, "f8") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_F8, 0, row, column};
+                }
                 if (strcmp(current_token, "str") == 0) {
                     tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_STR, 0, row, column};
                 }
@@ -55,6 +76,15 @@ Token *Tokenize(char *raw, int *total) {
                 if (strcmp(current_token, "ret") == 0) {
                     tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_RET, 0, row, column};
                 }
+                if (strcmp(current_token, "if") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_IF, 0, row, column};
+                }
+                if (strcmp(current_token, "while") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_WHILE, 0, row, column};
+                }
+                if (strcmp(current_token, "for") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_FOR, 0, row, column};
+                }
             }
 
             // Check if token is an integer
@@ -62,7 +92,17 @@ Token *Tokenize(char *raw, int *total) {
                 tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_INTEGER, .value.int_value=atoi(current_token), .row=row, .column=column};
             }
 
-            // Checks for Float/String/Bool here...
+            // Check if token is a float
+            else if (is_float(current_token)) {
+                tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_INTEGER, .value.int_value=atof(current_token), .row=row, .column=column};
+            }
+
+            // Check if token is a string (INCOMPLETE)
+
+            // Check if token is a bool
+            else if (is_bool(current_token)) {
+                tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_INTEGER, .value.int_value=atob(current_token), .row=row, .column=column};
+            }
 
             // Token is an identifier
             else {
@@ -82,43 +122,154 @@ Token *Tokenize(char *raw, int *total) {
 
             // Operators
             case '=':
-                tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_EQUAL, 0, row, column};
-                token_i++;
-                column++;
+                if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_EQUALEQUAL, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
+                } else {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_EQUAL, 0, row, column};
+                    token_i++;
+                    column++;
+                }
                 break;
 
             case '+':
-                tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_ADD, 0, row, column};
-                token_i++;
-                column++;
+                if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_ADDEQUAL, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
+                } else {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_ADD, 0, row, column};
+                    token_i++;
+                    column++;
+                }
                 break;
 
             case '-':
-                if (raw[i+1] != '>') {
+                if (raw[i+1] == '>') {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_ARROW, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
+                } else if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_SUBTRACTEQUAL, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
+                } else {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_SUBTRACT, 0, row, column};
                     token_i++;
                     column++;
+                }
+                break;
+
+            case '*':
+                if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_MULTIPLYEQUAL, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
                 } else {
-                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_ARROW, 0, row, column};
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_MULTIPLY, 0, row, column};
+                    token_i++;
+                    column++;
+                }
+                break;
+
+            case '/':
+                if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_DIVIDEEQUAL, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
+                } else {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_DIVIDE, 0, row, column};
+                    token_i++;
+                    column++;
+                }
+                break;
+
+            case '%':
+                if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_MODULOEQUAL, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
+                } else {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_MODULO, 0, row, column};
+                    token_i++;
+                    column++;
+                }
+                break;
+
+            case '<':
+                if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_LESSEQUAL, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
+                } else {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_LESS, 0, row, column};
+                    token_i++;
+                    column++;
+                }
+                break;
+
+            case '>':
+                if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_GREATEREQUAL, 0, row, column};
+                    token_i++;
+                    column+=2;
+                    i++;
+                } else {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_GREATER, 0, row, column};
+                    token_i++;
+                    column++;
+                }
+                break;
+
+            case '!':
+                if (raw[i+1] == '=') {
+                    tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_NOTEQUAL, 0, row, column};
                     token_i++;
                     column+=2;
                     i++;
                 }
                 break;
 
-            case '*':
-                tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_MULTIPLY, 0, row, column};
-                token_i++;
-                column++;
-                break;
-
-            case '/':
-                tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_DIVIDE, 0, row, column};
-                token_i++;
-                column++;
-                break;
-
             // Delimiters
+            case '(':
+                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_LPAREN, 0, row, column};
+                token_i++;
+                column++;
+                break;
+
+            case ')':
+                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_RPAREN, 0, row, column};
+                token_i++;
+                column++;
+                break;
+
+            case '{':
+                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_LBRACE, 0, row, column};
+                token_i++;
+                column++;
+                break;
+            
+            case '}':
+                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_RBRACE, 0, row, column};
+                token_i++;
+                column++;
+                break;
+
+            case ',':
+                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_COMMA, 0, row, column};
+                token_i++;
+                column++;
+                break;
+
             case ':':
                 tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_COLON, 0, row, column};
                 token_i++;
@@ -131,7 +282,23 @@ Token *Tokenize(char *raw, int *total) {
                 column++;
                 break;
 
+            case '\'':
+                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_SINGLEQUOTE, 0, row, column};
+                token_i++;
+                column++;
+                break;
+
+            case '"':
+                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_DOUBLEQUOTE, 0, row, column};
+                token_i++;
+                column++;
+                break;
+
             // Special
+            case '\t':
+                column += 4;
+                break;
+
             case '\n':
                 row++;
                 column = 0;
@@ -159,68 +326,4 @@ Token *Tokenize(char *raw, int *total) {
     // Returns
     *total = token_i;
     return tokens;
-}
-
-const char *TokenTypeToString(TokenType type) {
-    switch (type) {
-        case TOKEN_KEYWORD: return "KEYWORD";
-        case TOKEN_LITERAL: return "LITERAL";
-        case TOKEN_IDENTIFIER: return "IDENTIFIER";
-        case TOKEN_OPERATOR: return "OPERATOR";
-        case TOKEN_DELIMITER: return "DELIMITER";
-        case TOKEN_EOF: return "EOF";
-        default: return "UNKNOWN";
-    }
-}
-
-const char *TokenSubtypeToString(TokenSubtype type) {
-    switch (type) {
-        case NONE: return "NONE";
-        case KEYWORD_MAP: return "MAP";
-        case KEYWORD_RET: return "RET";
-        case KEYWORD_ARROW: return "ARROW";
-        case KEYWORD_I64: return "I64";
-        case KEYWORD_STR: return "STR";
-        case KEYWORD_BOOL: return "BOOL";
-        case LITERAL_INTEGER: return "INTEGER";
-        case LITERAL_FLOAT: return "FLOAT";
-        case LITERAL_STRING: return "STRING";
-        case LITERAL_BOOL: return "BOOL";
-        case OPERATOR_EQUAL: return "EQUAL";
-        case OPERATOR_ADD: return "ADD";
-        case OPERATOR_SUBTRACT: return "SUBTRACT";
-        case OPERATOR_MULTIPLY: return "MULTIPLY";
-        case OPERATOR_DIVIDE: return "DIVIDE";
-        case DELIMITER_COLON: return "COLON";
-        case DELIMITER_SEMICOLON: return "SEMICOLON";
-        default: return "UNKNOWN";
-    }
-}
-
-void PrintTokens(Token *tokens, int total) {
-    for (int i=0; i<total; i++) {
-        Token token = tokens[i];
-        
-        printf("[%s:%s", TokenTypeToString(token.type), TokenSubtypeToString(token.subtype));
-
-        if (token.type == TOKEN_LITERAL && token.subtype == LITERAL_INTEGER) {
-            printf("(%d)", token.value.int_value);
-        }
-        else if (token.type == TOKEN_LITERAL && token.subtype == LITERAL_FLOAT) {
-            printf("(%f)", token.value.float_value);
-        }
-        else if (token.type == TOKEN_LITERAL && token.subtype == LITERAL_STRING) {
-            printf("(%s)", token.value.string_value);
-        }
-        else if (token.type == TOKEN_LITERAL && token.subtype == LITERAL_BOOL) {
-            printf("(%hhi)", token.value.int_value);
-        }
-        
-        if (token.type == TOKEN_IDENTIFIER) {
-            printf("(%s)", token.value.string_value);
-        }
-
-        //printf(" @ %d:%d]\n", token.row, token.column);
-        printf("]\n");
-    }
 }

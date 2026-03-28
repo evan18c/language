@@ -114,6 +114,25 @@ Node *ParseDefinition(Parser *parser) {
     return node;
 }
 
+// Parse Definition
+Node *ParseAssignment(Parser *parser) {
+
+    // Create Node
+    Node *node = malloc(sizeof(Node));
+    node->type = NODE_ASSIGNMENT;
+
+    node->data.assignment.var = consume(parser).value.string_value; // identifier
+
+    consume(parser); // =
+
+    node->data.definition.expr = ParseExpression(parser);
+
+    consume(parser); // ;
+
+    // Return Node
+    return node;
+}
+
 Node **Parse(Token *tokens, int *total) {
 
     // Create Parser
@@ -131,6 +150,12 @@ Node **Parse(Token *tokens, int *total) {
         // Definitions
         if (peek(&parser).type == TOKEN_IDENTIFIER && peekn(&parser, 1).subtype == DELIMITER_COLON) {
             output[output_pos] = ParseDefinition(&parser);
+            output_pos++;
+        }
+
+        // Assignment
+        if (peek(&parser).type == TOKEN_IDENTIFIER && peekn(&parser, 1).subtype == OPERATOR_EQUAL) {
+            output[output_pos] = ParseAssignment(&parser);
             output_pos++;
         }
 

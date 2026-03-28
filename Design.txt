@@ -40,9 +40,9 @@ Tokenization Details:
 
 Parsing Details:
     Nodes:
-        Expression
         Definition
         Assignment
+        Expression
         Function
         FunctionCall
         FunctionReturn

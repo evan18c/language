@@ -46,8 +46,8 @@ typedef enum TokenSubtype_t {
     OPERATOR_MULTIPLY,
     OPERATOR_DIVIDE,
     OPERATOR_MODULO,
-    OPERATOR_PLUSEQUAL,
-    OPERATOR_MINUSEQUAL,
+    OPERATOR_ADDEQUAL,
+    OPERATOR_SUBTRACTEQUAL,
     OPERATOR_MULTIPLYEQUAL,
     OPERATOR_DIVIDEEQUAL,
     OPERATOR_MODULOEQUAL,
@@ -85,14 +85,5 @@ typedef struct {
 
 // Converts raw -> Tokens.
 Token *Tokenize(char *raw, int *total);
-
-// TokenType -> String.
-const char *TokenTypeToString(TokenType type);
-
-// TokenSubtype -> String.
-const char *TokenSubtypeToString(TokenSubtype type);
-
-// Pretty prints all tokens.
-void PrintTokens(Token *tokens, int total);
 
 #endif
