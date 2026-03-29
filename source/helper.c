@@ -60,7 +60,7 @@ bool atob(const char *str) {
     return false;
 }
 
-char *read_file(const char *path) {
+char *read(const char *path) {
     FILE *f;
     f = fopen(path, "r");
 
@@ -76,7 +76,7 @@ char *read_file(const char *path) {
     return data;
 }
 
-void write_file(const char *path, const char *buffer) {
+void write(const char *path, const char *buffer) {
     FILE *f = fopen(path, "w");
     fprintf(f, buffer);
     fclose(f);

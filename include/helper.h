@@ -23,9 +23,9 @@ bool is_string(const char *str);
 bool atob(const char *str);
 
 // Reads file into buffer.
-char *read_file(const char *path);
+char *read(const char *path);
 
 // Writes buffer to file.
-void write_file(const char *path, const char *buffer);
+void write(const char *path, const char *buffer);
 
 #endif
