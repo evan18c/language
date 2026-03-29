@@ -1,4 +1,5 @@
 // Converts Tokens -> AST
+// Follows Recursive Descent
 // Author: Evan Cassidy
 // Date: 3/27/2026
 #include "parse.h"
@@ -17,9 +18,26 @@ Token peekn(Parser *parser, int n) {
 }
 
 // Parser.consume
-Token consume(Parser *parser) {
+// eType: expected token type.
+// eSubtype: expected token subtype.
+Token consume(Parser *parser, TokenType eType, TokenSubtype eSubtype) {
     Token token = parser->tokens[parser->pos];
     parser->pos++;
+
+    // Validate TokenType
+    if (eType != ANY && token.type != eType) {
+        printf("Expected: %s. Received: ", TokenTypeToString(eType));
+        PrintToken(token);
+        exit(EXIT_FAILURE);
+    }
+
+    // Validate TokenSubtype
+    if (eSubtype != ANY && token.subtype != eSubtype) {
+        printf("Expected: %s. Received: ", TokenSubtypeToString(eSubtype));
+        PrintToken(token);
+        exit(EXIT_FAILURE);
+    }
+
     return token;
 }
 
@@ -73,7 +91,7 @@ Node *ParseStatement(Parser *parser) {
 // Parse Expression (Primary)
 Node *ParseExpressionPrimary(Parser *parser) {
     
-    Token token = consume(parser);
+    Token token = consume(parser, ANY, ANY);
 
     // Call
     if (token.type == TOKEN_IDENTIFIER && peek(parser).subtype == DELIMITER_LPAREN) {
@@ -83,13 +101,13 @@ Node *ParseExpressionPrimary(Parser *parser) {
         node->data.call.func = token.value.string_value;
         node->data.call.args_total = 0;
         node->data.call.statement = false;
-        consume(parser); // (
+        consume(parser, TOKEN_DELIMITER, DELIMITER_LPAREN); // (
         while (peek(parser).subtype != DELIMITER_RPAREN) {
-            if (node->data.call.args_total != 0) consume(parser); // ,
+            if (node->data.call.args_total != 0) consume(parser, TOKEN_DELIMITER, DELIMITER_COMMA); // ,
             node->data.call.args[node->data.call.args_total] = ParseExpression(parser);
             node->data.call.args_total++;
         }
-        consume(parser); // )
+        consume(parser, TOKEN_DELIMITER, DELIMITER_RPAREN); // )
         return node;
     }
 
@@ -124,7 +142,7 @@ Node *ParseExpressionPrimary(Parser *parser) {
     // Parenthesis
     if (token.subtype == DELIMITER_LPAREN) {
         Node *node = ParseExpression(parser);
-        consume(parser); // )
+        consume(parser, TOKEN_DELIMITER, DELIMITER_RPAREN); // )
         return node;
     }
 
@@ -140,7 +158,7 @@ Node *ParseExpressionMulDiv(Parser *parser) {
         node->type = NODE_BINARY;
 
         node->data.binary.l = expr;
-        node->data.binary.op = consume(parser).subtype;
+        node->data.binary.op = consume(parser, TOKEN_OPERATOR, ANY).subtype;
         node->data.binary.r = ParseExpressionPrimary(parser);
 
         expr = node;
@@ -158,7 +176,7 @@ Node *ParseExpressionAddSub(Parser *parser) {
         node->type = NODE_BINARY;
 
         node->data.binary.l = expr;
-        node->data.binary.op = consume(parser).subtype;
+        node->data.binary.op = consume(parser, TOKEN_OPERATOR, ANY).subtype;
         node->data.binary.r = ParseExpressionMulDiv(parser);
 
         expr = node;
@@ -179,17 +197,17 @@ Node *ParseDefinition(Parser *parser) {
     Node *node = malloc(sizeof(Node));
     node->type = NODE_DEFINITION;
 
-    node->data.definition.var = consume(parser).value.string_value; // identifier
+    node->data.definition.var = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value; // identifier
 
-    consume(parser); // :
+    consume(parser, TOKEN_DELIMITER, DELIMITER_COLON); // :
 
-    node->data.definition.type = consume(parser).subtype; // type
+    node->data.definition.type = consume(parser, TOKEN_KEYWORD, ANY).subtype; // type
 
-    consume(parser); // =
+    consume(parser, TOKEN_OPERATOR, OPERATOR_EQUAL); // =
 
     node->data.definition.expr = ParseExpression(parser); // expr
 
-    consume(parser); // ;
+    consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
 
     // Return Node
     return node;
@@ -202,13 +220,13 @@ Node *ParseAssignment(Parser *parser) {
     Node *node = malloc(sizeof(Node));
     node->type = NODE_ASSIGNMENT;
 
-    node->data.assignment.var = consume(parser).value.string_value; // identifier
+    node->data.assignment.var = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value; // identifier
 
-    consume(parser); // =
+    consume(parser, TOKEN_OPERATOR, OPERATOR_EQUAL); // =
 
     node->data.assignment.expr = ParseExpression(parser); // expr
 
-    consume(parser); // ;
+    consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
 
     // Return Node
     return node;
@@ -221,30 +239,30 @@ Node *ParseFunction(Parser *parser) {
     Node *node = malloc(sizeof(Node));
     node->type = NODE_FUNCTION;
 
-    consume(parser); // map
+    consume(parser, TOKEN_KEYWORD, KEYWORD_MAP); // map
 
-    node->data.function.name = consume(parser).value.string_value; // name
+    node->data.function.name = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value; // name
 
-    consume(parser); // (
+    consume(parser, TOKEN_DELIMITER, DELIMITER_LPAREN); // (
 
     node->data.function.args = malloc(sizeof(char *) * 1000);
     node->data.function.arg_types = malloc(sizeof(TokenSubtype *) * 1000);
     node->data.function.args_total = 0;
     while (peek(parser).subtype != DELIMITER_RPAREN) {
-        if (node->data.function.args_total != 0) consume(parser); // ,
-        node->data.function.args[node->data.function.args_total] = consume(parser).value.string_value;
-        consume(parser); // :
-        node->data.function.arg_types[node->data.function.args_total] = consume(parser).subtype; // arg type
+        if (node->data.function.args_total != 0) consume(parser, TOKEN_DELIMITER, DELIMITER_COMMA); // ,
+        node->data.function.args[node->data.function.args_total] = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value;
+        consume(parser, TOKEN_DELIMITER, DELIMITER_COLON); // :
+        node->data.function.arg_types[node->data.function.args_total] = consume(parser, TOKEN_KEYWORD, ANY).subtype; // arg type
         node->data.function.args_total++;
     }
 
-    consume(parser); // )
+    consume(parser, TOKEN_DELIMITER, DELIMITER_RPAREN); // )
 
-    consume(parser); // ->
+    consume(parser, TOKEN_KEYWORD, KEYWORD_ARROW); // ->
 
-    node->data.function.ret_type = consume(parser).subtype; // ret type
+    node->data.function.ret_type = consume(parser, TOKEN_KEYWORD, ANY).subtype; // ret type
 
-    consume(parser); // {
+    consume(parser, TOKEN_DELIMITER, DELIMITER_LBRACE); // {
 
     node->data.function.nodes = malloc(sizeof(Node *) * 1000);
     node->data.function.nodes_total = 0;
@@ -253,7 +271,7 @@ Node *ParseFunction(Parser *parser) {
         node->data.function.nodes_total++;
     }
 
-    consume(parser); // }
+    consume(parser, TOKEN_DELIMITER, DELIMITER_RBRACE); // }
 
     // Return Node
     return node;
@@ -263,7 +281,7 @@ Node *ParseFunction(Parser *parser) {
 Node *ParseFunctionStatement(Parser *parser) {
     Node *node = ParseExpressionPrimary(parser);
     node->data.call.statement = true;
-    consume(parser); // ;
+    consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
     return node;
 }
 
@@ -274,11 +292,11 @@ Node *ParseReturn(Parser *parser) {
     Node *node = malloc(sizeof(Node));
     node->type = NODE_RETURN;
 
-    consume(parser); // ret
+    consume(parser, TOKEN_KEYWORD, KEYWORD_RET); // ret
 
     node->data.return_t.ret = ParseExpression(parser);
 
-    consume(parser); // ;
+    consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
 
     // Return Node
     return node;

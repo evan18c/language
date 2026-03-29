@@ -5,6 +5,8 @@
 #define PARSE_H
 #include "tokenize.h"
 
+#define ANY 0
+
 // Node Types
 typedef enum NodeType_t {
     NODE_DEFINITION,
@@ -84,14 +86,14 @@ typedef struct Parser_t {
     Token *tokens;
     int pos;
 } Parser;
+Token peek(Parser *parser);
+Token peekn(Parser *parser, int n);
+Token consume(Parser *parser, TokenType eType, TokenSubtype eSubtype);
 
 // Converts Tokens -> Array of Nodes
 Node **Parse(Token *tokens, int *total);
 
 // Prototypes
-Token peek(Parser *parser);
-Token peekn(Parser *parser, int n);
-Token consume(Parser *parser);
 Node *ParseStatement(Parser *parser);
 Node *ParseDefinition(Parser *parser);
 Node *ParseAssignment(Parser *parser);
