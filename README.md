@@ -2,7 +2,7 @@
 E is a procedural, statically typed language written by me.
 
 ## Compilation
-E is currently transpiled. It is compiled into C, then compiled to a binary.
+E is currently transpiled into C.
 
 ## Example Code
 This code prints "hi" 10 times to the console.
