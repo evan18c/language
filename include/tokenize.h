@@ -78,10 +78,19 @@ typedef struct {
         char *string_value;
         bool bool_value;
     } value;
-    int row, column;
+    int line, column;
 } Token;
 
 // Converts raw -> Tokens.
 Token *Tokenize(char *raw, int *total);
+
+// Converts TokenType -> string.
+char *TokenTypeToString(TokenType type);
+
+// Converts TokenSubtype -> string.
+char *TokenSubtypeToString(TokenSubtype type);
+
+// Prints a token.
+char *PrintToken(Token token);
 
 #endif

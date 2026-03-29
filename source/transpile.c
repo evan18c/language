@@ -41,7 +41,7 @@ char *TypeToC(TokenSubtype type) {
         case KEYWORD_F32: return "int";
         case KEYWORD_F16: return "short";
         case KEYWORD_F8: return "short";
-        case KEYWORD_STR: return "char *";
+        case KEYWORD_STR: return "char*";
         case KEYWORD_BOOL: return "bool";
         default: return "<unknown>";
     }
@@ -98,7 +98,7 @@ char *NodeToC(Node *node) {
         case NODE_LITERAL:
             if (node->data.literal.type == LITERAL_INTEGER) sprintf(string, "%d", node->data.literal.val.int_value);
             if (node->data.literal.type == LITERAL_FLOAT) sprintf(string, "%f", node->data.literal.val.float_value);
-            if (node->data.literal.type == LITERAL_STRING) sprintf(string, "\"%s\"", node->data.literal.val.string_value);
+            if (node->data.literal.type == LITERAL_STRING) sprintf(string, "%s", node->data.literal.val.string_value);
             if (node->data.literal.type == LITERAL_BOOL) sprintf(string, "%f", node->data.literal.val.bool_value);
             break;
 
