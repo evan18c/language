@@ -127,6 +127,7 @@ Token *Tokenize(char *raw, int *total) {
 
             // Operators
             case '=':
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_EQUALEQUAL, 0, line, column};
                     token_i++;
@@ -140,6 +141,8 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '+':
+                if (bs) goto DEFAULT;
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_ADDEQUAL, 0, line, column};
                     token_i++;
@@ -153,6 +156,7 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '-':
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '>') {
                     tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_ARROW, 0, line, column};
                     token_i++;
@@ -171,6 +175,7 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '*':
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_MULTIPLYEQUAL, 0, line, column};
                     token_i++;
@@ -184,6 +189,7 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '/':
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_DIVIDEEQUAL, 0, line, column};
                     token_i++;
@@ -197,6 +203,7 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '%':
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_MODULOEQUAL, 0, line, column};
                     token_i++;
@@ -210,6 +217,7 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '<':
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_LESSEQUAL, 0, line, column};
                     token_i++;
@@ -223,6 +231,7 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '>':
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_GREATEREQUAL, 0, line, column};
                     token_i++;
@@ -236,6 +245,7 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '!':
+                if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_NOTEQUAL, 0, line, column};
                     token_i++;
@@ -246,42 +256,49 @@ Token *Tokenize(char *raw, int *total) {
 
             // Delimiters
             case '(':
+                if (bs) goto DEFAULT;
                 tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_LPAREN, 0, line, column};
                 token_i++;
                 column++;
                 break;
 
             case ')':
+                if (bs) goto DEFAULT;
                 tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_RPAREN, 0, line, column};
                 token_i++;
                 column++;
                 break;
 
             case '{':
+                if (bs) goto DEFAULT;
                 tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_LBRACE, 0, line, column};
                 token_i++;
                 column++;
                 break;
             
             case '}':
+                if (bs) goto DEFAULT;
                 tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_RBRACE, 0, line, column};
                 token_i++;
                 column++;
                 break;
 
             case ',':
+                if (bs) goto DEFAULT;
                 tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_COMMA, 0, line, column};
                 token_i++;
                 column++;
                 break;
 
             case ':':
+                if (bs) goto DEFAULT;
                 tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_COLON, 0, line, column};
                 token_i++;
                 column++;
                 break;
 
             case ';':
+                if (bs) goto DEFAULT;
                 tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_SEMICOLON, 0, line, column};
                 token_i++;
                 column++;
@@ -289,35 +306,29 @@ Token *Tokenize(char *raw, int *total) {
 
             // Special
             case '\t':
+                if (bs) goto DEFAULT;
                 column += 4;
                 break;
 
             case '\n':
+                if (bs) goto DEFAULT;
                 line++;
                 column = 0;
                 break;
 
             case ' ':
-                if (!bs) {
-                    line++;
-                    column = 0;
-                    break;
-                } else {
-                    current_token[cti] = ' ';
-                    cti++;
-                    column++;
-                }
+                if (bs) goto DEFAULT;
+                column++;
                 break;
 
             case '"':
                 bs = !bs;
-                current_token[cti] = '"';
-                cti++;
-                column++;
+                goto DEFAULT;
                 break;
 
             // Default
             default:
+                DEFAULT:
                 current_token[cti] = raw[i];
                 cti++;
                 column++;
@@ -399,7 +410,7 @@ char *TokenSubtypeToString(TokenSubtype type) {
     }
 }
 
-char *PrintToken(Token token) {
+void PrintToken(Token token) {
     switch (token.type) {
         case TOKEN_KEYWORD:
             printf("[%s.%s @ Line %d]\n", TokenTypeToString(token.type), TokenSubtypeToString(token.subtype), token.line);

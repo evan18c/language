@@ -91,6 +91,6 @@ char *TokenTypeToString(TokenType type);
 char *TokenSubtypeToString(TokenSubtype type);
 
 // Prints a token.
-char *PrintToken(Token token);
+void PrintToken(Token token);
 
 #endif
