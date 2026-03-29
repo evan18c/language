@@ -44,15 +44,15 @@ typedef struct Node_t {
             int nodes_total;
         } function;
 
+        struct call_t {
+            char *func;
+            Node **args;
+            int args_total;
+        } call;
+
         struct return_t {
             Node *ret;
         } return_t;
-
-        struct binary_t {
-            Node *l;
-            TokenSubtype op;
-            Node *r;
-        } binary;
 
         struct literal_t {
             long long val;
@@ -61,6 +61,12 @@ typedef struct Node_t {
         struct identifier_t {
             char *id;
         } identifier;
+
+        struct binary_t {
+            Node *l;
+            TokenSubtype op;
+            Node *r;
+        } binary;
 
     } data;
     

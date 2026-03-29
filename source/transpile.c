@@ -53,6 +53,7 @@ char *NodeToC(Node *node) {
     // Allocate string
     char *string = malloc(100);
     memset(string, 0, 100);
+    char buffer[1000] = {0}; // temp
 
     // Conversion
     switch (node->type) {
@@ -65,11 +66,9 @@ char *NodeToC(Node *node) {
             break;
 
         case NODE_FUNCTION:
-            char buffer[1000] = {0};
             sprintf(string, "%s %s(", TypeToC(node->data.function.ret_type), node->data.function.name);
             for (int i=0; i<node->data.function.args_total; i++) {
-                if (i>0) sprintf(string, ",");
-                sprintf(buffer, "%s %s", TypeToC(node->data.function.arg_types[i]), node->data.function.args[i]);
+                sprintf(buffer, "%s%s %s", (i > 0 ? "," : ""), TypeToC(node->data.function.arg_types[i]), node->data.function.args[i]);
                 strcat(string, buffer);
             }
             strcat(string, "){");
@@ -77,10 +76,17 @@ char *NodeToC(Node *node) {
                 sprintf(buffer, "%s", NodeToC(node->data.function.nodes[i]));
                 strcat(string, buffer);
             }
-            strcat(string, "};");
+            strcat(string, "}");
             break;
 
         case NODE_CALL:
+            char buffer[1000] = {0};
+            sprintf(string, "%s(", node->data.call.func);
+            for (int i=0; i<node->data.call.args_total; i++) {
+                sprintf(buffer, "%s%s", (i > 0 ? "," : ""), NodeToC(node->data.call.args[i]));
+                strcat(string, buffer);
+            }
+            strcat(string, ")");
             break;
 
         case NODE_RETURN:

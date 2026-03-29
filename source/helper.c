@@ -68,3 +68,9 @@ char *read_file(const char *path) {
     fclose(f);
     return data;
 }
+
+void write_file(const char *path, const char *buffer) {
+    FILE *f = fopen(path, "w");
+    fprintf(f, buffer);
+    fclose(f);
+}

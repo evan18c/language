@@ -71,6 +71,23 @@ Node *ParseExpressionPrimary(Parser *parser) {
     
     Token token = consume(parser);
 
+    // Call
+    if (token.type == TOKEN_IDENTIFIER && peek(parser).subtype == DELIMITER_LPAREN) {
+        Node *node = malloc(sizeof(Node));
+        node->type = NODE_CALL;
+        node->data.call.args = malloc(sizeof(Node *) * 1000);
+        node->data.call.func = token.value.string_value;
+        consume(parser); // (
+        while (peek(parser).subtype != DELIMITER_RPAREN) {
+            if (node->data.call.args_total != 0) consume(parser); // ,
+            node->data.call.args[node->data.call.args_total] = ParseExpression(parser);
+            node->data.call.args_total++;
+        }
+        consume(parser); // )
+        return node;
+    }
+
+    // Literal
     if (token.type == TOKEN_LITERAL) {
         Node *node = malloc(sizeof(Node));
         node->type = NODE_LITERAL;
@@ -78,6 +95,7 @@ Node *ParseExpressionPrimary(Parser *parser) {
         return node;
     }
 
+    // Identifier
     if (token.type == TOKEN_IDENTIFIER) {
         Node *node = malloc(sizeof(Node));
         node->type = NODE_IDENTIFIER;
@@ -85,10 +103,17 @@ Node *ParseExpressionPrimary(Parser *parser) {
         return node;
     }
 
-    printf("Unexpected token: %d\n", token.type);
+    // Parenthesis
+    if (token.subtype == DELIMITER_LPAREN) {
+        Node *node = ParseExpression(parser);
+        consume(parser); // )
+        return node;
+    }
+
+    printf("Unexpected token. Type:%d Subtype:%d\n", token.type, token.subtype);
 }
 
-// Parse Expression (Multiplication/Division)
+// Parse Expression (Multiplication/Division) peMDas
 Node *ParseExpressionMulDiv(Parser *parser) {
     Node *expr = ParseExpressionPrimary(parser);
 
@@ -106,7 +131,7 @@ Node *ParseExpressionMulDiv(Parser *parser) {
     return expr;
 }
 
-// Parse Expression (Addition/Subtraction)
+// Parse Expression (Addition/Subtraction) pemdAS
 Node *ParseExpressionAddSub(Parser *parser) {
     Node *expr = ParseExpressionMulDiv(parser);
 
@@ -163,7 +188,7 @@ Node *ParseAssignment(Parser *parser) {
 
     consume(parser); // =
 
-    node->data.definition.expr = ParseExpression(parser); // expr
+    node->data.assignment.expr = ParseExpression(parser); // expr
 
     consume(parser); // ;
 
@@ -216,6 +241,7 @@ Node *ParseFunction(Parser *parser) {
     return node;
 }
 
+// Parse Return
 Node *ParseReturn(Parser *parser) {
 
     // Create Node
