@@ -48,6 +48,7 @@ typedef struct Node_t {
             char *func;
             Node **args;
             int args_total;
+            bool statement;
         } call;
 
         struct return_t {
@@ -55,7 +56,13 @@ typedef struct Node_t {
         } return_t;
 
         struct literal_t {
-            long long val;
+            TokenSubtype type;
+            union val_t {
+                long long int_value;
+                double float_value;
+                char *string_value;
+                bool bool_value;
+            } val;
         } literal;
 
         struct identifier_t {
@@ -89,6 +96,7 @@ Node *ParseStatement(Parser *parser);
 Node *ParseDefinition(Parser *parser);
 Node *ParseAssignment(Parser *parser);
 Node *ParseFunction(Parser *parser);
+Node *ParseFunctionStatement(Parser *parser);
 Node *ParseReturn(Parser *parser);
 Node *ParseExpressionPrimary(Parser *parser);
 Node *ParseExpressionMulDiv(Parser *parser);

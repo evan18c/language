@@ -46,6 +46,13 @@ bool is_bool(const char *str) {
     return false;
 }
 
+bool is_string(const char *str) {
+    if (str[0] == '"' && str[strlen(str)-1] == '"') {
+        return true;
+    }
+    return false;
+}
+
 bool atob(const char *str) {
     if (strcmp(str, "true") == 0) {
         return true;

@@ -63,6 +63,7 @@ char *NodeToC(Node *node) {
             break;
 
         case NODE_ASSIGNMENT:
+            sprintf(string, "%s=%s;", node->data.assignment.var, NodeToC(node->data.assignment.expr));
             break;
 
         case NODE_FUNCTION:
@@ -86,7 +87,8 @@ char *NodeToC(Node *node) {
                 sprintf(buffer, "%s%s", (i > 0 ? "," : ""), NodeToC(node->data.call.args[i]));
                 strcat(string, buffer);
             }
-            strcat(string, ")");
+            if (node->data.call.statement) strcat(string, ");");
+            else strcat(string, ")");
             break;
 
         case NODE_RETURN:
@@ -94,7 +96,10 @@ char *NodeToC(Node *node) {
             break;
 
         case NODE_LITERAL:
-            sprintf(string, "%d", node->data.literal.val);
+            if (node->data.literal.type == LITERAL_INTEGER) sprintf(string, "%d", node->data.literal.val.int_value);
+            if (node->data.literal.type == LITERAL_FLOAT) sprintf(string, "%f", node->data.literal.val.float_value);
+            if (node->data.literal.type == LITERAL_STRING) sprintf(string, "\"%s\"", node->data.literal.val.string_value);
+            if (node->data.literal.type == LITERAL_BOOL) sprintf(string, "%f", node->data.literal.val.bool_value);
             break;
 
         case NODE_IDENTIFIER:
@@ -108,5 +113,4 @@ char *NodeToC(Node *node) {
 
     // Return
     return string;
-
 }

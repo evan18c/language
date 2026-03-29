@@ -60,6 +60,10 @@ Node *ParseStatement(Parser *parser) {
     if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_MAP)
         return ParseFunction(parser);
 
+    // Function Call (as a statement)
+    if (peek(parser).type == TOKEN_IDENTIFIER && peekn(parser, 1).subtype == DELIMITER_LPAREN)
+        return ParseFunctionStatement(parser);
+
     // Return
     if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_RET)
         return ParseReturn(parser);
@@ -77,6 +81,8 @@ Node *ParseExpressionPrimary(Parser *parser) {
         node->type = NODE_CALL;
         node->data.call.args = malloc(sizeof(Node *) * 1000);
         node->data.call.func = token.value.string_value;
+        node->data.call.args_total = 0;
+        node->data.call.statement = false;
         consume(parser); // (
         while (peek(parser).subtype != DELIMITER_RPAREN) {
             if (node->data.call.args_total != 0) consume(parser); // ,
@@ -91,7 +97,19 @@ Node *ParseExpressionPrimary(Parser *parser) {
     if (token.type == TOKEN_LITERAL) {
         Node *node = malloc(sizeof(Node));
         node->type = NODE_LITERAL;
-        node->data.literal.val = token.value.int_value;
+        node->data.literal.type = token.subtype;
+        if (token.subtype == LITERAL_INTEGER) {
+            node->data.literal.val.int_value = token.value.int_value;
+        }
+        else if (token.subtype == LITERAL_FLOAT) {
+            node->data.literal.val.float_value = token.value.float_value;
+        }
+        else if (token.subtype == LITERAL_STRING) {
+            node->data.literal.val.string_value = token.value.string_value;
+        }
+        else if (token.subtype == LITERAL_BOOL) {
+            node->data.literal.val.bool_value = token.value.bool_value;
+        }
         return node;
     }
 
@@ -238,6 +256,14 @@ Node *ParseFunction(Parser *parser) {
     consume(parser); // }
 
     // Return Node
+    return node;
+}
+
+// Parse Return
+Node *ParseFunctionStatement(Parser *parser) {
+    Node *node = ParseExpressionPrimary(parser);
+    node->data.call.statement = true;
+    consume(parser); // ;
     return node;
 }
 

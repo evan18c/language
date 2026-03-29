@@ -16,7 +16,7 @@ Token *Tokenize(char *raw, int *total) {
     int token_i = 0;
 
     // Dictionary
-    const char dict_ch[] = " =+-*/<>!(){},:;'%\"\n\t";
+    const char dict_ch[] = " =+-*/<>!(){},:;%\n\t";
     const char *dict_kw[] = {"i64", "i32", "i16", "i8", "f64", "f32", "f16", "f8", "str", "bool", "map", "ret", "->", "if", "while", "for"};
     const int dict_kw_length = sizeof(dict_kw) / sizeof(char *);
 
@@ -31,6 +31,7 @@ Token *Tokenize(char *raw, int *total) {
     // Working Token
     char current_token[100] = {0};
     int cti = 0;
+    bool bs = false; // building string flag
 
     // Loop through text
     while (i < length) {
@@ -85,37 +86,56 @@ Token *Tokenize(char *raw, int *total) {
                 if (strcmp(current_token, "for") == 0) {
                     tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_FOR, 0, row, column};
                 }
+                token_i++;
+                memset(current_token, 0, 100);
+                cti = 0;
             }
 
             // Check if token is an integer
             else if (is_integer(current_token)) {
                 tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_INTEGER, .value.int_value=atoi(current_token), .row=row, .column=column};
+                token_i++;
+                memset(current_token, 0, 100);
+                cti = 0;
             }
 
             // Check if token is a float
             else if (is_float(current_token)) {
-                tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_INTEGER, .value.int_value=atof(current_token), .row=row, .column=column};
+                tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_INTEGER, .value.float_value=atof(current_token), .row=row, .column=column};
+                token_i++;
+                memset(current_token, 0, 100);
+                cti = 0;
             }
 
-            // Check if token is a string (INCOMPLETE)
+            // Check if token is a string
+            else if (is_string(current_token)) {
+                char *str = malloc(strlen(current_token));
+                memset(str, 0, strlen(current_token));
+                strncpy(str, current_token + 1, strlen(current_token)-2);
+                tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_STRING, .value.string_value=str, .row=row, .column=column};
+                token_i++;
+                memset(current_token, 0, 100);
+                cti = 0;
+            }
 
             // Check if token is a bool
             else if (is_bool(current_token)) {
-                tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_INTEGER, .value.int_value=atob(current_token), .row=row, .column=column};
+                tokens[token_i] = (Token){.type=TOKEN_LITERAL, .subtype=LITERAL_INTEGER, .value.bool_value=atob(current_token), .row=row, .column=column};
+                token_i++;
+                memset(current_token, 0, 100);
+                cti = 0;
             }
 
             // Token is an identifier
-            else {
+            else if (!bs) {
                 char *str = malloc(strlen(current_token) + 1);
                 memset(str, 0, strlen(current_token) + 1);
                 strcpy(str, current_token);
                 tokens[token_i] = (Token){.type=TOKEN_IDENTIFIER, .subtype=NONE, .value.string_value=str, .row=row, .column=column};
+                token_i++;
+                memset(current_token, 0, 100);
+                cti = 0;
             }
-
-            // Increment
-            token_i++;
-            memset(current_token, 0, 100);
-            cti = 0;
         }
 
         // Handle individual character
@@ -283,18 +303,6 @@ Token *Tokenize(char *raw, int *total) {
                 column++;
                 break;
 
-            case '\'':
-                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_SINGLEQUOTE, 0, row, column};
-                token_i++;
-                column++;
-                break;
-
-            case '"':
-                tokens[token_i] = (Token){TOKEN_DELIMITER, DELIMITER_DOUBLEQUOTE, 0, row, column};
-                token_i++;
-                column++;
-                break;
-
             // Special
             case '\t':
                 column += 4;
@@ -306,8 +314,13 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case ' ':
-                column++;
-                break;
+                if (!bs) {
+                    column++;
+                    break;
+                }
+
+            case '"':
+                bs = !bs;
 
             // Default
             default:
