@@ -27,6 +27,12 @@ char *OperatorToC(TokenSubtype type) {
         case OPERATOR_MULTIPLYEQUAL: return "*-";
         case OPERATOR_DIVIDEEQUAL: return "/=";
         case OPERATOR_MODULOEQUAL: return "%=";
+        case OPERATOR_LESS: return "<";
+        case OPERATOR_GREATER: return ">";
+        case OPERATOR_LESSEQUAL: return "<=";
+        case OPERATOR_GREATEREQUAL: return ">=";
+        case OPERATOR_NOTEQUAL: return "!=";
+        case OPERATOR_EQUALEQUAL: return "==";
     }
 }
 
@@ -43,7 +49,6 @@ char *TypeToC(TokenSubtype type) {
         case KEYWORD_F8: return "short";
         case KEYWORD_STR: return "char*";
         case KEYWORD_BOOL: return "bool";
-        default: return "<unknown>";
     }
 }
 
@@ -93,6 +98,22 @@ char *NodeToC(Node *node) {
 
         case NODE_RETURN:
             sprintf(string, "return %s;", NodeToC(node->data.return_t.ret));
+            break;
+
+        case NODE_IF:
+            sprintf(string, "if(%s){", NodeToC(node->data.if_.cond));
+            for (int i=0; i<node->data.if_.nodes_total; i++) {
+                strcat(string, NodeToC(node->data.if_.nodes[i]));
+            }
+            strcat(string, "}");
+            break;
+
+        case NODE_WHILE:
+            sprintf(string, "while(%s){", NodeToC(node->data.if_.cond));
+            for (int i=0; i<node->data.if_.nodes_total; i++) {
+                strcat(string, NodeToC(node->data.if_.nodes[i]));
+            }
+            strcat(string, "}");
             break;
 
         case NODE_LITERAL:

@@ -86,7 +86,23 @@ Node *ParseStatement(Parser *parser) {
     if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_RET)
         return ParseReturn(parser);
 
+    // If
+    if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_IF)
+        return ParseIf(parser);
+
+    // While
+    if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_WHILE)
+        return ParseWhile(parser);
 }
+
+// Parse Expression
+Node *ParseExpression(Parser *parser) {
+    return ParseExpressionAddSub(parser);
+}
+
+
+
+
 
 // Parse Expression (Primary)
 Node *ParseExpressionPrimary(Parser *parser) {
@@ -167,11 +183,20 @@ Node *ParseExpressionMulDiv(Parser *parser) {
     return expr;
 }
 
-// Parse Expression (Addition/Subtraction) pemdAS
+// Parse Expression (Addition/Subtraction) (Includes Comparison Operators) pemdAS
 Node *ParseExpressionAddSub(Parser *parser) {
     Node *expr = ParseExpressionMulDiv(parser);
 
-    while(peek(parser).subtype == OPERATOR_ADD || peek(parser).subtype == OPERATOR_SUBTRACT) {
+    while(
+        peek(parser).subtype == OPERATOR_ADD ||
+        peek(parser).subtype == OPERATOR_SUBTRACT ||
+        peek(parser).subtype == OPERATOR_LESS ||
+        peek(parser).subtype == OPERATOR_GREATER ||
+        peek(parser).subtype == OPERATOR_LESSEQUAL ||
+        peek(parser).subtype == OPERATOR_GREATEREQUAL ||
+        peek(parser).subtype == OPERATOR_NOTEQUAL ||
+        peek(parser).subtype == OPERATOR_EQUALEQUAL
+    ) {
         Node *node = malloc(sizeof(Node));
         node->type = NODE_BINARY;
 
@@ -183,11 +208,6 @@ Node *ParseExpressionAddSub(Parser *parser) {
     }
 
     return expr;
-}
-
-// Parse Expression
-Node *ParseExpression(Parser *parser) {
-    return ParseExpressionAddSub(parser);
 }
 
 // Parse Definition
@@ -297,6 +317,58 @@ Node *ParseReturn(Parser *parser) {
     node->data.return_t.ret = ParseExpression(parser);
 
     consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
+
+    // Return Node
+    return node;
+}
+
+// Parse If
+Node *ParseIf(Parser *parser) {
+
+    // Create Node
+    Node *node = malloc(sizeof(Node));
+    node->type = NODE_IF;
+
+    consume(parser, TOKEN_KEYWORD, KEYWORD_IF); // if
+
+    node->data.if_.cond = ParseExpression(parser);
+
+    consume(parser, TOKEN_DELIMITER, DELIMITER_LBRACE); // {
+
+    node->data.if_.nodes = malloc(sizeof(Node *) * 1000);
+    node->data.if_.nodes_total = 0;
+    while (peek(parser).subtype != DELIMITER_RBRACE) {
+        node->data.if_.nodes[node->data.if_.nodes_total] = ParseStatement(parser);
+        node->data.if_.nodes_total++;
+    }
+
+    consume(parser, TOKEN_DELIMITER, DELIMITER_RBRACE); // }
+
+    // Return Node
+    return node;
+}
+
+// Parse While
+Node *ParseWhile(Parser *parser) {
+
+    // Create Node
+    Node *node = malloc(sizeof(Node));
+    node->type = NODE_IF;
+
+    consume(parser, TOKEN_KEYWORD, KEYWORD_WHILE); // if
+
+    node->data.while_.cond = ParseExpression(parser);
+    
+    consume(parser, TOKEN_DELIMITER, DELIMITER_LBRACE); // {
+
+    node->data.while_.nodes = malloc(sizeof(Node *) * 1000);
+    node->data.while_.nodes_total = 0;
+    while (peek(parser).subtype != DELIMITER_RBRACE) {
+        node->data.while_.nodes[node->data.while_.nodes_total] = ParseStatement(parser);
+        node->data.while_.nodes_total++;
+    }
+
+    consume(parser, TOKEN_DELIMITER, DELIMITER_RBRACE); // }
 
     // Return Node
     return node;

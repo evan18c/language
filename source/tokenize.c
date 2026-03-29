@@ -17,7 +17,7 @@ Token *Tokenize(char *raw, int *total) {
 
     // Dictionary
     const char dict_ch[] = " =+-*/<>!(){},:;%\n\t";
-    const char *dict_kw[] = {"i64", "i32", "i16", "i8", "f64", "f32", "f16", "f8", "str", "bool", "map", "ret", "->", "if", "while", "for"};
+    const char *dict_kw[] = {"i64", "i32", "i16", "i8", "f64", "f32", "f16", "f8", "str", "bool", "map", "ret", "->", "if", "while"};
     const int dict_kw_length = sizeof(dict_kw) / sizeof(char *);
 
     // Text Iterator
@@ -82,9 +82,6 @@ Token *Tokenize(char *raw, int *total) {
                 }
                 if (strcmp(current_token, "while") == 0) {
                     tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_WHILE, 0, line, column};
-                }
-                if (strcmp(current_token, "for") == 0) {
-                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_FOR, 0, line, column};
                 }
             }
 

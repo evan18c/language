@@ -9,14 +9,22 @@
 
 // Node Types
 typedef enum NodeType_t {
+
+    // Statements
     NODE_DEFINITION,
     NODE_ASSIGNMENT,
     NODE_FUNCTION,
     NODE_CALL,
     NODE_RETURN,
+    NODE_IF,
+    NODE_WHILE,
+
+    // Expressions
+    NODE_BINARY,
+
+    // Objects
     NODE_LITERAL,
-    NODE_IDENTIFIER,
-    NODE_BINARY
+    NODE_IDENTIFIER
 } NodeType;
 
 // Node
@@ -77,6 +85,18 @@ typedef struct Node_t {
             Node *r;
         } binary;
 
+        struct if_t {
+            Node *cond;
+            Node **nodes;
+            int nodes_total;
+        } if_;
+
+        struct while_t {
+            Node *cond;
+            Node **nodes;
+            int nodes_total;
+        } while_;
+
     } data;
     
 } Node;
@@ -93,16 +113,24 @@ Token consume(Parser *parser, TokenType eType, TokenSubtype eSubtype);
 // Converts Tokens -> Array of Nodes
 Node **Parse(Token *tokens, int *total);
 
-// Prototypes
+// Statement
 Node *ParseStatement(Parser *parser);
+
+// Statement Types
 Node *ParseDefinition(Parser *parser);
 Node *ParseAssignment(Parser *parser);
 Node *ParseFunction(Parser *parser);
 Node *ParseFunctionStatement(Parser *parser);
 Node *ParseReturn(Parser *parser);
+Node *ParseIf(Parser *parser);
+Node *ParseWhile(Parser *parser);
+
+// Expression
+Node *ParseExpression(Parser *parser);
+
+// Expression Types
 Node *ParseExpressionPrimary(Parser *parser);
 Node *ParseExpressionMulDiv(Parser *parser);
 Node *ParseExpressionAddSub(Parser *parser);
-Node *ParseExpression(Parser *parser);
 
 #endif

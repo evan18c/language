@@ -14,7 +14,7 @@
 
 int main() {
     
-    const char *code = read_file("data/code.l");
+    const char *code = read_file("data/code.e");
 
     printf("Tokenizing...");
     int total_tokens;
@@ -28,6 +28,7 @@ int main() {
 
     printf("Writing to C file...");
     FILE *f = fopen("data/code.c", "w");
+    fprintf(f, "#include <stdio.h>\n");
     for (int i=0; i<total_nodes; i++) {
         fprintf(f, "%s\n", NodeToC(nodes[i]));
     }
