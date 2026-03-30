@@ -43,12 +43,13 @@ char *TypeToC(TokenSubtype type) {
         case KEYWORD_I32: return "int";
         case KEYWORD_I16: return "short";
         case KEYWORD_I8: return "short";
-        case KEYWORD_F64: return "long long";
-        case KEYWORD_F32: return "int";
-        case KEYWORD_F16: return "short";
-        case KEYWORD_F8: return "short";
+        case KEYWORD_F64: return "double";
+        case KEYWORD_F32: return "float";
+        case KEYWORD_F16: return "float";
+        case KEYWORD_F8: return "float";
         case KEYWORD_STR: return "char*";
         case KEYWORD_BOOL: return "bool";
+        case KEYWORD_VOID: return "void";
     }
 }
 
@@ -106,6 +107,11 @@ char *NodeToC(Node *node) {
                 strcat(string, NodeToC(node->data.if_.nodes[i]));
             }
             strcat(string, "}");
+            for (int i=0; i<node->data.if_.else_nodes_total; i++) {
+                if (i==0) strcat(string, "else{");
+                strcat(string, NodeToC(node->data.if_.else_nodes[i]));
+                if (i==node->data.if_.else_nodes_total-1) strcat(string, "}");
+            }
             break;
 
         case NODE_WHILE:

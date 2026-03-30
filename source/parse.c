@@ -169,7 +169,11 @@ Node *ParseExpressionPrimary(Parser *parser) {
 Node *ParseExpressionMulDiv(Parser *parser) {
     Node *expr = ParseExpressionPrimary(parser);
 
-    while(peek(parser).subtype == OPERATOR_MULTIPLY || peek(parser).subtype == OPERATOR_DIVIDE) {
+    while(
+        peek(parser).subtype == OPERATOR_MULTIPLY ||
+        peek(parser).subtype == OPERATOR_DIVIDE ||
+        peek(parser).subtype == OPERATOR_MODULO
+    ) {
         Node *node = malloc(sizeof(Node));
         node->type = NODE_BINARY;
 
@@ -344,6 +348,20 @@ Node *ParseIf(Parser *parser) {
 
     consume(parser, TOKEN_DELIMITER, DELIMITER_RBRACE); // }
 
+    // Check for else
+    node->data.if_.else_nodes_total = 0;
+    if (peek(parser).subtype == KEYWORD_ELSE) {
+        consume(parser, TOKEN_KEYWORD, KEYWORD_ELSE); // else
+        consume(parser, TOKEN_DELIMITER, DELIMITER_LBRACE); // {
+        node->data.if_.else_nodes = malloc(sizeof(Node *) * 1000);
+        node->data.if_.else_nodes_total = 0;
+        while (peek(parser).subtype != DELIMITER_RBRACE) {
+            node->data.if_.else_nodes[node->data.if_.else_nodes_total] = ParseStatement(parser);
+            node->data.if_.else_nodes_total++;
+        }
+        consume(parser, TOKEN_DELIMITER, DELIMITER_RBRACE); // }
+    }
+
     // Return Node
     return node;
 }
@@ -353,7 +371,7 @@ Node *ParseWhile(Parser *parser) {
 
     // Create Node
     Node *node = malloc(sizeof(Node));
-    node->type = NODE_IF;
+    node->type = NODE_WHILE;
 
     consume(parser, TOKEN_KEYWORD, KEYWORD_WHILE); // if
 

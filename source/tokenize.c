@@ -17,7 +17,7 @@ Token *Tokenize(char *raw, int *total) {
 
     // Dictionary
     const char dict_ch[] = " =+-*/<>!(){},:;%\n\t";
-    const char *dict_kw[] = {"i64", "i32", "i16", "i8", "f64", "f32", "f16", "f8", "str", "bool", "map", "ret", "->", "if", "while"};
+    const char *dict_kw[] = {"i64", "i32", "i16", "i8", "f64", "f32", "f16", "f8", "str", "bool", "map", "ret", "->", "if", "while", "void", "else"};
     const int dict_kw_length = sizeof(dict_kw) / sizeof(char *);
 
     // Text Iterator
@@ -83,6 +83,12 @@ Token *Tokenize(char *raw, int *total) {
                 if (strcmp(current_token, "while") == 0) {
                     tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_WHILE, 0, line, column};
                 }
+                if (strcmp(current_token, "void") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_VOID, 0, line, column};
+                }
+                if (strcmp(current_token, "else") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_ELSE, 0, line, column};
+                }
             }
 
             // Check if token is an integer
@@ -141,7 +147,6 @@ Token *Tokenize(char *raw, int *total) {
                 break;
 
             case '+':
-                if (bs) goto DEFAULT;
                 if (bs) goto DEFAULT;
                 if (raw[i+1] == '=') {
                     tokens[token_i] = (Token){TOKEN_OPERATOR, OPERATOR_ADDEQUAL, 0, line, column};
@@ -367,7 +372,7 @@ char *TokenSubtypeToString(TokenSubtype type) {
         case KEYWORD_ARROW: return "KEYWORD_ARROW";
         case KEYWORD_IF: return "KEYWORD_IF";
         case KEYWORD_WHILE: return "KEYWORD_WHILE";
-        case KEYWORD_FOR: return "KEYWORD_FOR";
+        case KEYWORD_ELSE: return "KEYWORD_ELSE";
         case KEYWORD_I64: return "KEYWORD_I64";
         case KEYWORD_I32: return "KEYWORD_I32";
         case KEYWORD_I16: return "KEYWORD_I16";
@@ -378,6 +383,7 @@ char *TokenSubtypeToString(TokenSubtype type) {
         case KEYWORD_F8: return "KEYWORD_F8";
         case KEYWORD_STR: return "KEYWORD_STR";
         case KEYWORD_BOOL: return "KEYWORD_BOOL";
+        case KEYWORD_VOID: return "KEYWORD_VOID";
         case LITERAL_INTEGER: return "LITERAL_INTEGER";
         case LITERAL_FLOAT: return "LITERAL_FLOAT";
         case LITERAL_STRING: return "LITERAL_STRING";

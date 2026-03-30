@@ -22,7 +22,7 @@ typedef enum TokenSubtype_t {
     KEYWORD_ARROW,
     KEYWORD_IF,
     KEYWORD_WHILE,
-    KEYWORD_FOR,
+    KEYWORD_ELSE,
 
     KEYWORD_I64,
     KEYWORD_I32,
@@ -34,6 +34,7 @@ typedef enum TokenSubtype_t {
     KEYWORD_F8,
     KEYWORD_STR,
     KEYWORD_BOOL,
+    KEYWORD_VOID,
 
     LITERAL_INTEGER,
     LITERAL_FLOAT,

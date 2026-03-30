@@ -32,9 +32,9 @@ map fact(x:i32) -> i32 {
 ```
 
 ## Types
-The language currently supports 10 unique types:
-`i64 i32 i16 i8 f64 f32 f16 f8 str bool`
+The language currently supports 11 unique types:
+`i64 i32 i16 i8 f64 f32 f16 f8 str bool void`
 
 ## Keywords
 The following keywords are reserved:
-`map ret -> if while`
+`map ret -> if while else`

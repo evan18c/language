@@ -89,6 +89,8 @@ typedef struct Node_t {
             Node *cond;
             Node **nodes;
             int nodes_total;
+            Node **else_nodes;
+            int else_nodes_total;
         } if_;
 
         struct while_t {
