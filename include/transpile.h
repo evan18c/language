@@ -9,13 +9,13 @@
 #include "tokenize.h"
 #include "parse.h"
 
+// Converts a Node to C code
+char *NodeToC(Node *node);
+
 // Converts an operator to C code
 char *OperatorToC(TokenSubtype type);
 
 // Converts custom type to C type
 char *TypeToC(TokenSubtype type);
-
-// Converts a Node to C code
-char *NodeToC(Node *node);
 
 #endif

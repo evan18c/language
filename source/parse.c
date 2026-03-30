@@ -101,6 +101,10 @@ Node *ParseStatement(Parser *parser) {
     // Bus
     if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_BUS)
         return ParseBus(parser);
+
+    // Item
+    if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_ITEM)
+        return ParseItem(parser);
 }
 
 // Parse Expression
@@ -233,11 +237,21 @@ Node *ParseDefinition(Parser *parser) {
 
     consume(parser, TOKEN_DELIMITER, DELIMITER_COLON); // :
 
-    node->data.definition.type = consume(parser, TOKEN_KEYWORD, ANY).subtype; // type
+    if (peek(parser).type == TOKEN_KEYWORD) {
+        node->data.definition.type = consume(parser, TOKEN_KEYWORD, ANY).subtype; // type
+        node->data.definition.custom = false;
+    } else {
+        node->data.definition.custom_type = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value; // type
+        node->data.definition.custom = true;
+    }
 
-    consume(parser, TOKEN_OPERATOR, OPERATOR_EQUAL); // =
-
-    node->data.definition.expr = ParseExpression(parser); // expr
+    if (peek(parser).type == TOKEN_OPERATOR && peek(parser).subtype == OPERATOR_EQUAL) {
+        node->data.definition.init = true;
+        consume(parser, TOKEN_OPERATOR, OPERATOR_EQUAL); // =
+        node->data.definition.expr = ParseExpression(parser); // expr
+    } else {
+        node->data.definition.init = false;
+    }
 
     consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
 
@@ -434,4 +448,34 @@ Node *ParseBus(Parser *parser) {
     // Return Node
     return node;
 
+}
+
+// Parse Item
+Node *ParseItem(Parser *parser) {
+
+    // Create Node
+    Node *node = malloc(sizeof(Node));
+    node->type = NODE_ITEM;
+
+    consume(parser, TOKEN_KEYWORD, KEYWORD_ITEM); // item
+
+    node->data.item.name = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value; // name
+
+    consume(parser, TOKEN_DELIMITER, DELIMITER_LBRACE); // {
+
+    node->data.item.vars = malloc(sizeof(char *) * 1000);
+    node->data.item.var_types = malloc(sizeof(TokenSubtype *) * 1000);
+    node->data.item.var_total = 0;
+    while (peek(parser).subtype != DELIMITER_RBRACE) {
+        node->data.item.vars[node->data.item.var_total] = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value; // identifier
+        consume(parser, TOKEN_DELIMITER, DELIMITER_COLON); // :
+        node->data.item.var_types[node->data.item.var_total] = consume(parser, TOKEN_KEYWORD, ANY).subtype; // type
+        consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
+        node->data.item.var_total++;
+    }
+
+    consume(parser, TOKEN_DELIMITER, DELIMITER_RBRACE); // }
+
+    // Return Node
+    return node;
 }

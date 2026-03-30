@@ -20,6 +20,7 @@ typedef enum NodeType_t {
     NODE_WHILE,
     NODE_STOP,
     NODE_BUS,
+    NODE_ITEM,
 
     // Expressions
     NODE_BINARY,
@@ -37,8 +38,11 @@ typedef struct Node_t {
 
         struct definition_t {
             char *var;
+            bool custom;
             TokenSubtype type;
+            char *custom_type;
             Node *expr;
+            bool init;
         } definition;
 
         struct assignment_t {
@@ -109,6 +113,13 @@ typedef struct Node_t {
             char *dest;
         } bus;
 
+        struct item_t {
+            char *name;
+            char **vars;
+            TokenSubtype *var_types;
+            int var_total;
+        } item;
+
     } data;
     
 } Node;
@@ -138,6 +149,7 @@ Node *ParseIf(Parser *parser);
 Node *ParseWhile(Parser *parser);
 Node *ParseStop(Parser *parser);
 Node *ParseBus(Parser *parser);
+Node *ParseItem(Parser *parser);
 
 // Expression
 Node *ParseExpression(Parser *parser);

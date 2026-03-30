@@ -9,49 +9,10 @@
 #include <stdint.h>
 
 // Imports
+#include "transpile.h"
 #include "helper.h"
 #include "tokenize.h"
 #include "parse.h"
-
-// Converts an operator to C code
-char *OperatorToC(TokenSubtype type) {
-    switch (type) {
-        case OPERATOR_EQUAL: return "=";
-        case OPERATOR_ADD: return "+";
-        case OPERATOR_SUBTRACT: return "-";
-        case OPERATOR_MULTIPLY: return "*";
-        case OPERATOR_DIVIDE: return "/";
-        case OPERATOR_MODULO: return "%";
-        case OPERATOR_ADDEQUAL: return "+=";
-        case OPERATOR_SUBTRACTEQUAL: return "-=";
-        case OPERATOR_MULTIPLYEQUAL: return "*-";
-        case OPERATOR_DIVIDEEQUAL: return "/=";
-        case OPERATOR_MODULOEQUAL: return "%=";
-        case OPERATOR_LESS: return "<";
-        case OPERATOR_GREATER: return ">";
-        case OPERATOR_LESSEQUAL: return "<=";
-        case OPERATOR_GREATEREQUAL: return ">=";
-        case OPERATOR_NOTEQUAL: return "!=";
-        case OPERATOR_EQUALEQUAL: return "==";
-    }
-}
-
-// Converts custom type to C type
-char *TypeToC(TokenSubtype type) {
-    switch (type) {
-        case KEYWORD_I64: return "long long";
-        case KEYWORD_I32: return "int";
-        case KEYWORD_I16: return "short";
-        case KEYWORD_I8: return "short";
-        case KEYWORD_F64: return "double";
-        case KEYWORD_F32: return "float";
-        case KEYWORD_F16: return "float";
-        case KEYWORD_F8: return "float";
-        case KEYWORD_STR: return "char*";
-        case KEYWORD_BOOL: return "bool";
-        case KEYWORD_VOID: return "void";
-    }
-}
 
 // Converts a Node to C code
 char *NodeToC(Node *node) {
@@ -65,7 +26,20 @@ char *NodeToC(Node *node) {
     switch (node->type) {
 
         case NODE_DEFINITION:
-            sprintf(string, "%s %s=%s;", TypeToC(node->data.definition.type), node->data.definition.var, NodeToC(node->data.definition.expr));
+            if (node->data.definition.init) {
+                if (node->data.definition.custom) {
+                    sprintf(string, "%s %s=%s;", node->data.definition.custom_type, node->data.definition.var, NodeToC(node->data.definition.expr));
+                } else {
+                    sprintf(string, "%s %s=%s;", TypeToC(node->data.definition.type), node->data.definition.var, NodeToC(node->data.definition.expr));
+                }
+            }
+            else {
+                if (node->data.definition.custom) {
+                    sprintf(string, "%s %s;", node->data.definition.custom_type, node->data.definition.var);
+                } else {
+                    sprintf(string, "%s %s;", TypeToC(node->data.definition.type), node->data.definition.var);
+                }
+            }
             break;
 
         case NODE_ASSIGNMENT:
@@ -130,11 +104,21 @@ char *NodeToC(Node *node) {
             sprintf(string, "goto %s;", node->data.bus.dest);
             break;
 
+        case NODE_ITEM:
+            sprintf(string, "typedef struct{");
+            for (int i=0; i<node->data.item.var_total; i++) {
+                sprintf(buffer, "%s %s;", TypeToC(node->data.item.var_types[i]), node->data.item.vars[i]);
+                strcat(string, buffer);
+            }
+            sprintf(buffer, "}%s;", node->data.item.name);
+            strcat(string, buffer);
+            break;
+
         case NODE_LITERAL:
             if (node->data.literal.type == LITERAL_INTEGER) sprintf(string, "%d", node->data.literal.val.int_value);
             if (node->data.literal.type == LITERAL_FLOAT) sprintf(string, "%f", node->data.literal.val.float_value);
             if (node->data.literal.type == LITERAL_STRING) sprintf(string, "%s", node->data.literal.val.string_value);
-            if (node->data.literal.type == LITERAL_BOOL) sprintf(string, "%f", node->data.literal.val.bool_value);
+            if (node->data.literal.type == LITERAL_BOOL) sprintf(string, "%s", node->data.literal.val.bool_value ? "true" : "false");
             break;
 
         case NODE_IDENTIFIER:
@@ -148,4 +132,44 @@ char *NodeToC(Node *node) {
 
     // Return
     return string;
+}
+
+// Converts an operator to C code
+char *OperatorToC(TokenSubtype type) {
+    switch (type) {
+        case OPERATOR_EQUAL: return "=";
+        case OPERATOR_ADD: return "+";
+        case OPERATOR_SUBTRACT: return "-";
+        case OPERATOR_MULTIPLY: return "*";
+        case OPERATOR_DIVIDE: return "/";
+        case OPERATOR_MODULO: return "%";
+        case OPERATOR_ADDEQUAL: return "+=";
+        case OPERATOR_SUBTRACTEQUAL: return "-=";
+        case OPERATOR_MULTIPLYEQUAL: return "*-";
+        case OPERATOR_DIVIDEEQUAL: return "/=";
+        case OPERATOR_MODULOEQUAL: return "%=";
+        case OPERATOR_LESS: return "<";
+        case OPERATOR_GREATER: return ">";
+        case OPERATOR_LESSEQUAL: return "<=";
+        case OPERATOR_GREATEREQUAL: return ">=";
+        case OPERATOR_NOTEQUAL: return "!=";
+        case OPERATOR_EQUALEQUAL: return "==";
+    }
+}
+
+// Converts custom type to C type
+char *TypeToC(TokenSubtype type) {
+    switch (type) {
+        case KEYWORD_I64: return "long long";
+        case KEYWORD_I32: return "int";
+        case KEYWORD_I16: return "short";
+        case KEYWORD_I8: return "short";
+        case KEYWORD_F64: return "double";
+        case KEYWORD_F32: return "float";
+        case KEYWORD_F16: return "float";
+        case KEYWORD_F8: return "float";
+        case KEYWORD_STR: return "char*";
+        case KEYWORD_BOOL: return "bool";
+        case KEYWORD_VOID: return "void";
+    }
 }

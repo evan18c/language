@@ -28,6 +28,8 @@ typedef enum TokenSubtype_t {
     KEYWORD_BUS,
     KEYWORD_STOP,
 
+    KEYWORD_ITEM,
+
     KEYWORD_I64,
     KEYWORD_I32,
     KEYWORD_I16,

@@ -17,7 +17,9 @@ Token *Tokenize(char *raw, int *total) {
 
     // Dictionary
     const char dict_ch[] = " =+-*/<>!(){},:;%\n\t";
-    const char *dict_kw[] = {"i64", "i32", "i16", "i8", "f64", "f32", "f16", "f8", "str", "bool", "map", "ret", "->", "if", "while", "void", "else", "bus", "stop"};
+    const char *dict_kw[] = {
+        "i64", "i32", "i16", "i8", "f64", "f32", "f16", "f8", "str", "bool", "map", "ret", "->", "if", "while", "void", "else", "bus", "stop", "item"
+    };
     const int dict_kw_length = sizeof(dict_kw) / sizeof(char *);
 
     // Text Iterator
@@ -94,6 +96,9 @@ Token *Tokenize(char *raw, int *total) {
                 }
                 if (strcmp(current_token, "stop") == 0) {
                     tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_STOP, 0, line, column};
+                }
+                if (strcmp(current_token, "item") == 0) {
+                    tokens[token_i] = (Token){TOKEN_KEYWORD, KEYWORD_ITEM, 0, line, column};
                 }
             }
 
@@ -381,6 +386,7 @@ char *TokenSubtypeToString(TokenSubtype type) {
         case KEYWORD_ELSE: return "KEYWORD_ELSE";
         case KEYWORD_BUS: return "KEYWORD_BUS";
         case KEYWORD_STOP: return "KEYWORD_STOP";
+        case KEYWORD_ITEM: return "KEYWORD_ITEM";
         case KEYWORD_I64: return "KEYWORD_I64";
         case KEYWORD_I32: return "KEYWORD_I32";
         case KEYWORD_I16: return "KEYWORD_I16";
