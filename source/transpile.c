@@ -122,6 +122,14 @@ char *NodeToC(Node *node) {
             strcat(string, "}");
             break;
 
+        case NODE_STOP:
+            sprintf(string, "%s:", node->data.stop.label);
+            break;
+
+        case NODE_BUS:
+            sprintf(string, "goto %s;", node->data.bus.dest);
+            break;
+
         case NODE_LITERAL:
             if (node->data.literal.type == LITERAL_INTEGER) sprintf(string, "%d", node->data.literal.val.int_value);
             if (node->data.literal.type == LITERAL_FLOAT) sprintf(string, "%f", node->data.literal.val.float_value);

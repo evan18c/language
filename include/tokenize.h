@@ -20,9 +20,13 @@ typedef enum TokenSubtype_t {
     KEYWORD_MAP,
     KEYWORD_RET,
     KEYWORD_ARROW,
+
     KEYWORD_IF,
     KEYWORD_WHILE,
     KEYWORD_ELSE,
+
+    KEYWORD_BUS,
+    KEYWORD_STOP,
 
     KEYWORD_I64,
     KEYWORD_I32,
@@ -70,7 +74,7 @@ typedef enum TokenSubtype_t {
 
 } TokenSubtype;
 
-typedef struct {
+typedef struct Token_t {
     TokenType type;
     TokenSubtype subtype;
     union value_t {

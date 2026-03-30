@@ -93,6 +93,14 @@ Node *ParseStatement(Parser *parser) {
     // While
     if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_WHILE)
         return ParseWhile(parser);
+
+    // Stop
+    if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_STOP)
+        return ParseStop(parser);
+
+    // Bus
+    if (peek(parser).type == TOKEN_KEYWORD && peek(parser).subtype == KEYWORD_BUS)
+        return ParseBus(parser);
 }
 
 // Parse Expression
@@ -390,4 +398,40 @@ Node *ParseWhile(Parser *parser) {
 
     // Return Node
     return node;
+}
+
+// Parse Stop
+Node *ParseStop(Parser *parser) {
+
+    // Create Node
+    Node *node = malloc(sizeof(Node));
+    node->type = NODE_STOP;
+
+    consume(parser, TOKEN_KEYWORD, KEYWORD_STOP); // stop
+
+    node->data.stop.label = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value; // label
+
+    consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
+
+    // Return Node
+    return node;
+
+}
+
+// Parse Bus
+Node *ParseBus(Parser *parser) {
+
+    // Create Node
+    Node *node = malloc(sizeof(Node));
+    node->type = NODE_BUS;
+
+    consume(parser, TOKEN_KEYWORD, KEYWORD_BUS); // stop
+
+    node->data.bus.dest = consume(parser, TOKEN_IDENTIFIER, ANY).value.string_value; // label
+
+    consume(parser, TOKEN_DELIMITER, DELIMITER_SEMICOLON); // ;
+
+    // Return Node
+    return node;
+
 }

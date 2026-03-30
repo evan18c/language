@@ -7,27 +7,19 @@ E is currently transpiled into C.
 ## Example Code
 This code prints "hi" 10 times to the console. Alongside a factorial function.
 ```
-map S(x:i32) -> i32 {
-    ret x + 1;
-}
-
-map main() -> i32 {
-
-    x: i32 = 0;
-
-    while (x < 10) {
-        printf("hi");
-        x = S(x);
-    }
-
-    ret 0;
-}
-
 map fact(x:i32) -> i32 {
     if (x == 1) {
         ret 1;
     }
     ret x * fact(x - 1);
+}
+
+map main() -> void {
+
+    x:i32 = fact(5);
+
+    printf("5! = %d\n", x);
+
 }
 ```
 
@@ -37,4 +29,4 @@ The language currently supports 11 unique types:
 
 ## Keywords
 The following keywords are reserved:
-`map ret -> if while else`
+`map ret -> if while else bus stop`

@@ -18,6 +18,8 @@ typedef enum NodeType_t {
     NODE_RETURN,
     NODE_IF,
     NODE_WHILE,
+    NODE_STOP,
+    NODE_BUS,
 
     // Expressions
     NODE_BINARY,
@@ -99,6 +101,14 @@ typedef struct Node_t {
             int nodes_total;
         } while_;
 
+        struct stop_t {
+            char *label;
+        } stop;
+
+        struct bus_t {
+            char *dest;
+        } bus;
+
     } data;
     
 } Node;
@@ -126,6 +136,8 @@ Node *ParseFunctionStatement(Parser *parser);
 Node *ParseReturn(Parser *parser);
 Node *ParseIf(Parser *parser);
 Node *ParseWhile(Parser *parser);
+Node *ParseStop(Parser *parser);
+Node *ParseBus(Parser *parser);
 
 // Expression
 Node *ParseExpression(Parser *parser);
