@@ -5,7 +5,7 @@ E is a procedural, statically typed language written by me.
 E is currently transpiled into C.
 
 ## Example Code
-This code prints "hi" 10 times to the console. Alongside a factorial function.
+This is a factorial demo:
 ```
 map fact(x:i32) -> i32 {
     if (x == 1) {
